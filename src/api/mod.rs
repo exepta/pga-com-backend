@@ -1,1 +1,1 @@
-pub(crate) mod user_rest;
+pub mod user_rest;
