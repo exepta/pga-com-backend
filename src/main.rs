@@ -8,15 +8,19 @@ use axum::response::{Html, Response};
 use axum::{middleware, Router, ServiceExt};
 use axum::routing::get;
 use tower_cookies::CookieManagerLayer;
+use crate::model::ModelController;
 
 mod error;
 mod web;
+mod model;
 
 #[tokio::main]
-async fn main() {
+async fn main() -> Result<()> {
+    let mc = ModelController::new().await?;
 
     let router = Router::new()
-        .merge(web::route_login::routes())
+        .nest("/api", web::route_login::routes())
+        .nest("/api", web::route_user::routes(mc.clone()))
         .layer(middleware::map_response(master_response_mapper))
         .layer(CookieManagerLayer::new());
 
@@ -27,6 +31,8 @@ async fn main() {
     axum::serve(listener, router.into_make_service())
         .await
         .unwrap();
+
+    Ok(())
 }
 
 async fn master_response_mapper(res: Response) -> Response {

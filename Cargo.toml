@@ -7,7 +7,7 @@ edition = "2021"
 # Web / UUID
 uuid = {version = "1.8.0", features = ["v4"]}
 tokio = {version = "^1", features = ["full"]}
-axum = "^0.7"
+axum = {version = "^0.7", features = ["macros"]}
 tower-http = {version = "^0.5", features = ["fs"]}
 tower-cookies = "^0"
 
