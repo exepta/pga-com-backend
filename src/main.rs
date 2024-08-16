@@ -1,31 +1,37 @@
-mod api;
-mod database;
+#![allow(unused)]
 
-use api::user_rest::{
-    get_user
-};
+pub use self::error::{Error, Result};
 
-use actix_web::{HttpServer, App, web::Data, middleware::Logger};
-use crate::database::base::{connect, disconnect, generate_default_tables};
+use std::fmt::format;
+use std::net::SocketAddr;
+use axum::response::{Html, Response};
+use axum::{middleware, Router, ServiceExt};
+use axum::routing::get;
+use tower_cookies::CookieManagerLayer;
 
-#[actix_web::main]
-async fn main() -> std::io::Result<()> {
-    std::env::set_var("RUST_LOG", "debug");
-    std::env::set_var("RUST_BACKTRACE", "1");
-    env_logger::init();
+mod error;
+mod web;
 
-    let mut client = connect("localhost", 5432, "postgres", "postgres", "postgres");
-    generate_default_tables(&mut client);
-    disconnect(&mut client);
+#[tokio::main]
+async fn main() {
 
-    HttpServer::new(move || {
-        let logger = Logger::default();
-        App::new()
-            .wrap(logger)
-            .service(get_user)
-    }).bind(("127.0.0.1", 80))
-        ?.run()
+    let router = Router::new()
+        .merge(web::route_login::routes())
+        .layer(middleware::map_response(master_response_mapper))
+        .layer(CookieManagerLayer::new());
+
+    let listener = tokio::net::TcpListener::bind(format!("localhost:{}", 8090))
+        .await.unwrap();
+
+    println!("Successfully bound on port [ {:?} ]\n", listener.local_addr());
+    axum::serve(listener, router.into_make_service())
         .await
+        .unwrap();
+}
 
+async fn master_response_mapper(res: Response) -> Response {
+    println!("->> {:<12} - master_response_mapper", "RES_MAPPER");
 
+    println!();
+    res
 }
