@@ -7,7 +7,10 @@ pub type Result<T> = core::result::Result<T, Error>;
 pub enum Error {
     LoginFail,
 
-    UserDeleteByIdFailed { id: String },
+    UserListCannotBeFetch,
+    UserWasFoundByEmail {email: String},
+    UserDeleteByIdFailed {id: String},
+    UserCreationFailed {username: String},
 }
 
 impl IntoResponse for Error {

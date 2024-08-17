@@ -1,0 +1,1 @@
+pub const DATABASE_URL :&str = "postgres://postgres:postgres@localhost:5432/postgres";

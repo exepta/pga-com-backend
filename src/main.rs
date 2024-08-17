@@ -1,43 +1,43 @@
-#![allow(unused)]
+mod resources;
+mod database;
+mod repositories;
+mod web;
+mod model;
+mod error;
 
 pub use self::error::{Error, Result};
 
-use std::fmt::format;
-use std::net::SocketAddr;
-use axum::response::{Html, Response};
-use axum::{middleware, Router, ServiceExt};
-use axum::routing::get;
-use tower_cookies::CookieManagerLayer;
-use crate::model::ModelController;
-
-mod error;
-mod web;
-mod model;
+use axum::{Router};
+use crate::model::user::UserController;
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    let mc = ModelController::new().await?;
+    println!("Starting Backend Server...");
+    database::connect_test().await;
+    create_default_tables().await;
+    println!("Connected to Postgres 17!");
 
-    let router = Router::new()
-        .nest("/api", web::route_login::routes())
-        .nest("/api", web::route_user::routes(mc.clone()))
-        .layer(middleware::map_response(master_response_mapper))
-        .layer(CookieManagerLayer::new());
-
-    let listener = tokio::net::TcpListener::bind(format!("localhost:{}", 8090))
-        .await.unwrap();
-
-    println!("Successfully bound on port [ {:?} ]\n", listener.local_addr());
-    axum::serve(listener, router.into_make_service())
-        .await
-        .unwrap();
+    initialize("localhost", 8090).await;
 
     Ok(())
 }
 
-async fn master_response_mapper(res: Response) -> Response {
-    println!("->> {:<12} - master_response_mapper", "RES_MAPPER");
+async fn initialize(host: &str, port: i32) {
+    let user_controller = UserController::new().await;
 
-    println!();
-    res
+    let router: Router = Router::new()
+        .nest("/api", web::user_rest::routes(user_controller.unwrap().clone()));
+
+    println!("Try to bind Server on Port [ {} ]", port);
+    let listener = tokio::net::TcpListener::bind(format!("{}:{}", host, port))
+        .await
+        .unwrap();
+
+    axum::serve(listener, router.into_make_service())
+        .await
+        .unwrap();
+}
+
+async fn create_default_tables() {
+    database::create_table("./migrations/0001_user_table.sql").await;
 }
