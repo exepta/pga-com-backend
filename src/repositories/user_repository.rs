@@ -57,6 +57,18 @@ pub async fn get_user_by_email(email: &str) -> Result<DBUser, Error> {
     Ok(user)
 }
 
+/// Get the user by username.
+pub async fn get_user_by_username(username: &str) -> Result<DBUser, Error> {
+    let pool = generate_pool().await;
+
+    let user = sqlx::query_as::<_, DBUser>(
+        "SELECT * FROM users WHERE username = $1"
+    ).bind(username).fetch_one(&pool).await?;
+
+    pool.close().await;
+    Ok(user)
+}
+
 /// Get a list of all users.
 pub async fn get_users() -> Result<Vec<DBUser>, Error> {
     let pool = generate_pool().await;

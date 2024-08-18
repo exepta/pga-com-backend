@@ -14,3 +14,12 @@ Content-Type: application/json
   "password": "1234563"
 }
 
+### Post user login
+POST http://localhost:8090/api/v0/auth/login
+Content-Type: application/json
+
+{
+  "username": "genshin.exepta@outlook.com",
+  "password": "1234563"
+}
+

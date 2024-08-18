@@ -8,19 +8,19 @@ use crate::repositories::user_repository::{create_db_user, delete_user, get_user
 
 #[derive(Clone, Debug, Serialize)]
 pub struct User {
-    username: String,
-    email: String,
-    password: String,
-    role: String,
-    created_at: String,
-    updated_at: String,
+    pub username: String,
+    pub email: String,
+    pub password: String,
+    pub role: String,
+    pub created_at: String,
+    pub updated_at: String,
 }
 
 #[derive(Deserialize)]
 pub struct UserForCreation {
-    username: String,
-    email: String,
-    password: String,
+    pub username: String,
+    pub email: String,
+    pub password: String,
 }
 
 #[derive(Clone)]

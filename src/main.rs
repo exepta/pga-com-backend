@@ -4,11 +4,12 @@ mod repositories;
 mod web;
 mod model;
 mod error;
-mod utils;
+mod util;
 
 pub use self::error::{Error, Result};
 
 use axum::{Router};
+use crate::model::auth::AuthController;
 use crate::model::user::UserController;
 
 #[tokio::main]
@@ -24,10 +25,12 @@ async fn main() -> Result<()> {
 }
 
 async fn initialize(host: &str, port: i32) {
-    let user_controller = UserController::new().await;
+    let user_controller = UserController::new().await.unwrap();
+    let auth_controller = AuthController::new().await.unwrap();
 
     let router: Router = Router::new()
-        .nest("/api", web::user_rest::routes(user_controller.unwrap().clone()));
+        .nest("/api", web::user_rest::routes(user_controller.clone()))
+        .nest("/api", web::auth_rest::routes(user_controller.clone(), auth_controller.clone()));
 
     println!("Try to bind Server on Port [ {} ]", port);
     let listener = tokio::net::TcpListener::bind(format!("{}:{}", host, port))
