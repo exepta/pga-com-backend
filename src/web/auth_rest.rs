@@ -60,11 +60,16 @@ async fn login_user(State(controller): State<AuthController>, Json(login_user): 
     let hash = hash_password(data.password);
     data.password = hash;
 
-    let user = controller.login(LoginInfo {
+    let raw_user = controller.login(LoginInfo {
         username: data.username,
         password: data.password
-    }).await.unwrap();
+    }).await;
 
+    if(raw_user.is_err()) {
+        return (StatusCode::UNAUTHORIZED).into_response()
+    }
+
+    let user = raw_user.unwrap();
     let json_response = Json(user.clone());
 
     let mut cookie = Cookie::new("token", controller.generate_jwt(user.clone().email.as_str(), JWT_TOKKEN.as_str()).unwrap());
