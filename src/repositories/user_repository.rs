@@ -33,6 +33,18 @@ pub async fn create_db_user(db_user: &DBUser) {
     println!("Insert new user [ {} ]", db_user.username);
 }
 
+/// Remove a user from the user's database.
+pub async fn delete_user(email: &str) -> Result<bool, Error> {
+    let pool = generate_pool().await;
+
+    let state = sqlx::query("DELETE FROM users WHERE email = $1").bind(email)
+        .execute(&pool)
+        .await.is_ok();
+
+    pool.close().await;
+    Ok(state)
+}
+
 /// Get the user by email
 pub async fn get_user_by_email(email: &str) -> Result<DBUser, Error> {
     let pool = generate_pool().await;

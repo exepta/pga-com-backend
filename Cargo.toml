@@ -12,9 +12,14 @@ axum = {version = "^0.7", features = ["macros"]}
 tower-http = {version = "^0.5", features = ["fs"]}
 tower-cookies = "^0"
 
+lazy_static = "^1"
+
 # JSON / Serde
+jsonwebtoken = "^9"
 serde = {version = "^1", features = ["derive"]}
 serde_json = "^1"
+dotenv = "^0"
+chrono = "^0"
 
 [dev-dependencies]
 anyhow = "^1"

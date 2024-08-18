@@ -8,6 +8,7 @@ pub enum Error {
     LoginFail,
 
     UserListCannotBeFetch,
+    UserNotFound {email: String},
     UserWasFoundByEmail {email: String},
     UserDeleteByIdFailed {id: String},
     UserCreationFailed {username: String},

@@ -4,6 +4,7 @@ mod repositories;
 mod web;
 mod model;
 mod error;
+mod utils;
 
 pub use self::error::{Error, Result};
 

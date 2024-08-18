@@ -7,7 +7,7 @@ use crate::resources::DATABASE_URL;
 
 /// Test the postgres connection from the resources' module. (DATABASE_URL)
 pub async fn connect_test() {
-    let test = sqlx::postgres::PgConnection::connect(DATABASE_URL)
+    let test = sqlx::postgres::PgConnection::connect(DATABASE_URL.as_str())
         .await
         .expect("[TEST] Connection failed!");
 
@@ -15,12 +15,12 @@ pub async fn connect_test() {
 }
 
 pub async fn generate_pool() -> PgPool {
-    PgPool::connect(DATABASE_URL).await.unwrap()
+    PgPool::connect(DATABASE_URL.as_str()).await.unwrap()
 }
 
 /// Create a table in the database from an .sql file.
 pub async fn create_table(table_path: &str) {
-    let connection = PgPool::connect(DATABASE_URL)
+    let connection = PgPool::connect(DATABASE_URL.as_str())
         .await
         .unwrap();
 
@@ -38,7 +38,7 @@ pub async fn create_table(table_path: &str) {
 
 /// Refresh an existing table (first drop then its call create_table() fn!).
 pub async fn drop_create_table(dropped_name: &str, table_path: &str) {
-    let connection = PgPool::connect(DATABASE_URL)
+    let connection = PgPool::connect(DATABASE_URL.as_str())
         .await
         .unwrap();
 

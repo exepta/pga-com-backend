@@ -1,0 +1,16 @@
+### GET request for user list
+GET http://localhost:8090/api/v0/users
+
+### GET request for user list with attribs
+GET http://localhost:8090/api/v0/users/role/member
+
+### Post request for user create
+POST http://localhost:8090/api/v0/users
+Content-Type: application/json
+
+{
+  "username": "Felix",
+  "email": "felix@pga.com",
+  "password": "1234563"
+}
+

@@ -1,9 +1,10 @@
 #![allow(unused)]
 
+use std::hint::black_box;
 use crate::{Error};
 use serde::{Deserialize, Serialize};
 use crate::repositories;
-use crate::repositories::user_repository::{create_db_user, get_user_by_email, get_users, DBUser};
+use crate::repositories::user_repository::{create_db_user, delete_user, get_user_by_email, get_users, get_users_with_attrib, DBUser};
 
 #[derive(Clone, Debug, Serialize)]
 pub struct User {
@@ -59,6 +60,11 @@ impl UserController {
         })
     }
 
+    pub async fn delete(&self, email: &str) -> crate::Result<bool> {
+        let state = delete_user(email).await.unwrap();
+        Ok(state)
+    }
+
     pub async fn list_all_users(&self) -> Result<Vec<User>, Error> {
         let users = get_users().await;
         if(users.is_err()) {
@@ -66,7 +72,23 @@ impl UserController {
         }
 
         let db_users = users.unwrap();
-        let users : Vec<User> = db_users.into_iter().map(|db_user| {
+
+        Ok(Self::convert_user_to_vec(db_users)?)
+    }
+
+    pub async fn list_attrib_users(&self, attrib: &str, value: &str) -> Result<Vec<User>, Error> {
+        let users = get_users_with_attrib(attrib, value).await;
+        if(users.is_err()) {
+            return Err(Error::UserListCannotBeFetch);
+        }
+
+        let db_users = users.unwrap();
+
+        Ok(Self::convert_user_to_vec(db_users)?)
+    }
+
+    fn convert_user_to_vec(db_users: Vec<DBUser>) -> crate::Result<Vec<User>> {
+        let users = db_users.into_iter().map(|db_user| {
             User {
                 username: db_user.username,
                 email: db_user.email,
@@ -76,7 +98,6 @@ impl UserController {
                 updated_at: db_user.updated_at.to_string(),
             }
         }).collect();
-
         Ok(users)
     }
 }
