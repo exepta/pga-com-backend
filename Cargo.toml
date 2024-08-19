@@ -10,7 +10,7 @@ tokio = {version = "^1", features = ["full"]}
 sqlx = {version = "^0", features = ["postgres", "runtime-tokio-rustls", "chrono"]}
 axum = {version = "^0.7", features = ["macros"]}
 axum-extra = { version = "^0.9", features = ["typed-header"] }
-tower-http = {version = "^0.5", features = ["fs"]}
+tower-http = {version = "^0.5", features = ["fs", "cors"]}
 tower-cookies = "^0"
 
 lazy_static = "^1"

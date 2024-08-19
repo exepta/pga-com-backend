@@ -9,6 +9,7 @@ mod util;
 pub use self::error::{Error, Result};
 
 use axum::{Router};
+use tower_http::cors::{Any, CorsLayer};
 use crate::model::auth::AuthController;
 use crate::model::user::UserController;
 
@@ -28,9 +29,14 @@ async fn initialize(host: &str, port: i32) {
     let user_controller = UserController::new().await.unwrap();
     let auth_controller = AuthController::new().await.unwrap();
 
+    let cros = CorsLayer::new()
+        .allow_origin(Any)
+        .allow_headers(Any);
+
     let router: Router = Router::new()
         .nest("/api", web::user_rest::routes(user_controller.clone(), auth_controller.clone()))
-        .nest("/api", web::auth_rest::routes(user_controller.clone(), auth_controller.clone()));
+        .nest("/api", web::auth_rest::routes(user_controller.clone(), auth_controller.clone())
+            .layer(cros));
 
     println!("Try to bind Server on Port [ {} ]", port);
     let listener = tokio::net::TcpListener::bind(format!("{}:{}", host, port))
