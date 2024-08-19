@@ -1,20 +1,24 @@
 ### GET request for user list
 GET http://localhost:8090/api/v0/users
+Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJleGVwdGFAcGdhLmNvbSIsImV4cCI6MTcyNTI4MjAxMH0.uiYeWSCWSKZtAEMO034MOhaAmRoIIjb_4HcVLOfhJGQ
 
 ### GET request for user list with attribs
 GET http://localhost:8090/api/v0/users/role/member
 
-### Post request for user create
-POST http://localhost:8090/api/v0/users
+### GET request for single direct user
+GET http://localhost:8090/api/v0/users/exepta
+
+### POST auth register new user (Create the dummy for the login tests)
+POST http://localhost:8090/api/v0/auth/register
 Content-Type: application/json
 
 {
-  "username": "Felix",
-  "email": "felix@pga.com",
-  "password": "1234563"
+  "username": "exepta",
+  "email": "exepta@pga.com",
+  "password": "123456"
 }
 
-### Post auth user login
+### POST auth user login (Successfully)
 POST http://localhost:8090/api/v0/auth/login
 Content-Type: application/json
 
@@ -23,13 +27,12 @@ Content-Type: application/json
   "password": "123456"
 }
 
-### Post auth register new user
-POST http://localhost:8090/api/v0/auth/register
+### POST auth user login (Failed)
+POST http://localhost:8090/api/v0/auth/login
 Content-Type: application/json
 
 {
-  "username": "exepta",
-  "email": "exepta@pga.com",
-  "password": "123456"
+  "username": "exepta@pga.com",
+  "password": "1234567"
 }
 

@@ -4,7 +4,7 @@ use std::hint::black_box;
 use crate::{Error};
 use serde::{Deserialize, Serialize};
 use crate::repositories;
-use crate::repositories::user_repository::{create_db_user, delete_user, get_user_by_email, get_users, get_users_with_attrib, DBUser};
+use crate::repositories::user_repository::{create_db_user, delete_user, get_user_by_email, get_users, get_users_with_attrib, DBUser, get_user_by_username};
 
 #[derive(Clone, Debug, Serialize)]
 pub struct User {
@@ -63,6 +63,32 @@ impl UserController {
     pub async fn delete(&self, email: &str) -> crate::Result<bool> {
         let state = delete_user(email).await.unwrap();
         Ok(state)
+    }
+
+    pub async fn get_user_by_name_or_email(&self, data: &str) -> Result<User, Error> {
+        let mut user :DBUser;
+        if(data.contains("@")) {
+            let result = get_user_by_email(&data).await;
+            if(result.is_err()) {
+                return Err(Error::UserNotFound {email: data.to_string()})
+            }
+            user = result.unwrap();
+        } else {
+            let result = get_user_by_username(&data).await;
+            if(result.is_err()) {
+                return Err(Error::UserNotFound {email: data.to_string()})
+            }
+            user = result.unwrap();
+        }
+
+        Ok(User {
+            username: user.username,
+            email: user.email,
+            password: user.password,
+            role: user.role,
+            created_at: user.created_at.to_string(),
+            updated_at: user.updated_at.to_string(),
+        })
     }
 
     pub async fn list_all_users(&self) -> Result<Vec<User>, Error> {

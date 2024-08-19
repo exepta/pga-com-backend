@@ -53,30 +53,25 @@ async fn register_user(State(controller): State<UserController>, Json(reg_user):
 
 }
 
-
-#[debug_handler]
-async fn login_user(State(controller): State<AuthController>, Json(login_user): Json<LoginInfo>) -> impl IntoResponse {
+async fn login_user(State(controller): State<AuthController>, Json(login_user): Json<LoginInfo>) -> Result<Json<LoginResponse>, StatusCode> {
     let mut data = login_user;
     let hash = hash_password(data.password);
     data.password = hash;
 
-    let raw_user = controller.login(LoginInfo {
-        username: data.username,
-        password: data.password
-    }).await;
-
-    if(raw_user.is_err()) {
-        return (StatusCode::UNAUTHORIZED).into_response()
+    let raw_login = controller.login(data).await;
+    if(raw_login.is_err()) {
+        return Err(StatusCode::UNAUTHORIZED)
     }
 
-    let user = raw_user.unwrap();
-    let json_response = Json(user.clone());
+    let user = raw_login.unwrap();
+    let token = controller.generate_jwt(&user.email.as_str(), JWT_TOKKEN.as_str());
+    if(token.is_err()) {
+        return Err(StatusCode::INTERNAL_SERVER_ERROR)
+    }
 
-    let mut cookie = Cookie::new("token", controller.generate_jwt(user.clone().email.as_str(), JWT_TOKKEN.as_str()).unwrap());
-    cookie.set_path("/");
-    cookie.set_max_age(cookie::time::Duration::hours(1));
-    cookie.set_same_site(SameSite::None);
-    cookie.set_http_only(true);
-
-    (StatusCode::OK, [(CONTENT_TYPE, "application/json"), (axum::http::header::SET_COOKIE, cookie.to_string().as_str())], json_response).into_response()
+    Ok(Json(LoginResponse {
+        username: user.username,
+        email: user.email,
+        token: token.unwrap(),
+    }))
 }

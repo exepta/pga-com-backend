@@ -2,10 +2,11 @@
 
 use axum::http::StatusCode;
 use chrono::{Duration, Utc};
-use jsonwebtoken::{decode, encode, DecodingKey, EncodingKey, Header, TokenData, Validation};
+use jsonwebtoken::{decode, DecodingKey, encode, EncodingKey, Header, TokenData, Validation};
 use serde::{Deserialize, Serialize};
 use crate::model::user::User;
 use crate::repositories::user_repository::{get_user_by_email, get_user_by_username};
+use crate::resources::{JWT_LIFE_SPAN, JWT_TOKKEN};
 
 #[derive(Deserialize)]
 pub struct LoginInfo {
@@ -15,6 +16,8 @@ pub struct LoginInfo {
 
 #[derive(Serialize)]
 pub struct LoginResponse {
+    pub username: String,
+    pub email: String,
     pub token: String
 }
 
@@ -60,14 +63,11 @@ impl AuthController {
     }
 
     pub fn generate_jwt(&self, user_email: &str, secret: &str) -> Result<String, jsonwebtoken::errors::Error> {
-        let expiration = Utc::now()
-            .checked_sub_signed(Duration::hours(1))
-            .expect("Timestamp invalid...")
-            .timestamp();
+        let expiration = Utc::now() + Duration::days(*JWT_LIFE_SPAN);
 
         let claims = Claims {
             sub: user_email.to_string(),
-            exp: expiration as usize,
+            exp: expiration.timestamp() as usize,
         };
 
         encode(&Header::default(), &claims, &EncodingKey::from_secret(secret.as_ref()))

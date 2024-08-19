@@ -29,7 +29,7 @@ async fn initialize(host: &str, port: i32) {
     let auth_controller = AuthController::new().await.unwrap();
 
     let router: Router = Router::new()
-        .nest("/api", web::user_rest::routes(user_controller.clone()))
+        .nest("/api", web::user_rest::routes(user_controller.clone(), auth_controller.clone()))
         .nest("/api", web::auth_rest::routes(user_controller.clone(), auth_controller.clone()));
 
     println!("Try to bind Server on Port [ {} ]", port);
