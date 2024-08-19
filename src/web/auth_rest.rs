@@ -2,10 +2,11 @@
 
 use axum::{debug_handler, Json, Router};
 use axum::extract::{FromRef, State};
-use axum::http::{StatusCode};
+use axum::http::{HeaderMap, StatusCode};
 use axum::http::header::{CONTENT_TYPE, SET_COOKIE};
 use axum::response::{IntoResponse, Response};
 use axum::routing::{get, post};
+use axum_extra::headers::{Authorization, HeaderMapExt};
 use chrono::{Duration, TimeDelta};
 use jsonwebtoken::{encode, EncodingKey, Header};
 use tower_cookies::{cookie, Cookie};
@@ -77,10 +78,13 @@ async fn login_user(State(controller): State<AuthController>, Json(login_user): 
     }))
 }
 
-async fn check_user_session(State(controller): State<AuthController>, Json(token_obj): Json<UserTokenCheck>) -> Result<Json<UserTokenState>, StatusCode> {
-    let mut data = token_obj;
+async fn check_user_session(State(controller): State<AuthController>, header: HeaderMap) -> Result<Json<UserTokenState>, StatusCode> {
+    let authentication_token = header.get("Authorization").ok_or(Error::UserTokenCorrupted);
+    if authentication_token.is_err() {
+        return Err(StatusCode::UNAUTHORIZED);
+    }
 
-    let unpack_token = controller.decode_jwt(data.token.as_str(), JWT_TOKKEN.as_str());
+    let unpack_token = controller.decode_jwt(authentication_token.unwrap().to_str().unwrap(), JWT_TOKKEN.as_str());
     if(unpack_token.is_err()) {
         return Err(StatusCode::UNAUTHORIZED)
     }
@@ -90,5 +94,5 @@ async fn check_user_session(State(controller): State<AuthController>, Json(token
         state = true;
     }
 
-    Ok(Json(UserTokenState{state}))
+    Ok(Json(UserTokenState{ state }))
 }

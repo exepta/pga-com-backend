@@ -36,3 +36,6 @@ Content-Type: application/json
   "password": "1234567"
 }
 
+### GET request for single direct user
+GET http://localhost:8090/api/v0/auth/session_check
+
