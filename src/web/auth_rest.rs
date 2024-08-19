@@ -5,13 +5,13 @@ use axum::extract::{FromRef, State};
 use axum::http::{StatusCode};
 use axum::http::header::{CONTENT_TYPE, SET_COOKIE};
 use axum::response::{IntoResponse, Response};
-use axum::routing::post;
+use axum::routing::{get, post};
 use chrono::{Duration, TimeDelta};
 use jsonwebtoken::{encode, EncodingKey, Header};
 use tower_cookies::{cookie, Cookie};
 use tower_cookies::cookie::SameSite;
 use crate::Error;
-use crate::model::auth::{AuthController, Claims, LoginInfo, LoginResponse};
+use crate::model::auth::{AuthController, Claims, LoginInfo, LoginResponse, UserTokenCheck, UserTokenState};
 use crate::model::user::{User, UserController, UserForCreation};
 use crate::repositories::user_repository::{create_db_user, get_user_by_email, DBUser};
 use crate::resources::JWT_TOKKEN;
@@ -28,6 +28,7 @@ pub fn routes(uc: UserController, ac: AuthController) -> Router {
     Router::new()
         .route("/v0/auth/login", post(login_user))
         .route("/v0/auth/register", post(register_user))
+        .route("/v0/auth/session_check", get(check_user_session))
         .with_state(app_state)
 }
 
@@ -63,7 +64,7 @@ async fn login_user(State(controller): State<AuthController>, Json(login_user): 
         return Err(StatusCode::UNAUTHORIZED)
     }
 
-    let user = raw_login.unwrap();
+    let user = raw_login?;
     let token = controller.generate_jwt(&user.email.as_str(), JWT_TOKKEN.as_str());
     if(token.is_err()) {
         return Err(StatusCode::INTERNAL_SERVER_ERROR)
@@ -74,4 +75,20 @@ async fn login_user(State(controller): State<AuthController>, Json(login_user): 
         email: user.email,
         token: token.unwrap(),
     }))
+}
+
+async fn check_user_session(State(controller): State<AuthController>, Json(token_obj): Json<UserTokenCheck>) -> Result<Json<UserTokenState>, StatusCode> {
+    let mut data = token_obj;
+
+    let unpack_token = controller.decode_jwt(data.token.as_str(), JWT_TOKKEN.as_str());
+    if(unpack_token.is_err()) {
+        return Err(StatusCode::UNAUTHORIZED)
+    }
+
+    let mut state: bool = false;
+    if(controller.is_valid(&unpack_token.unwrap().claims)) {
+        state = true;
+    }
+
+    Ok(Json(UserTokenState{state}))
 }

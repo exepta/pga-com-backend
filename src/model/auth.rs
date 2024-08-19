@@ -14,6 +14,16 @@ pub struct LoginInfo {
     pub password: String,
 }
 
+#[derive(Deserialize)]
+pub struct UserTokenCheck {
+    pub token: String
+}
+
+#[derive(Serialize)]
+pub struct UserTokenState {
+    pub state: bool
+}
+
 #[derive(Serialize)]
 pub struct LoginResponse {
     pub username: String,
