@@ -14,12 +14,22 @@ Content-Type: application/json
   "password": "1234563"
 }
 
-### Post user login
+### Post auth user login
 POST http://localhost:8090/api/v0/auth/login
 Content-Type: application/json
 
 {
-  "username": "genshin.exepta@outlook.com",
-  "password": "1234563"
+  "username": "exepta@pga.com",
+  "password": "123456"
+}
+
+### Post auth register new user
+POST http://localhost:8090/api/v0/auth/register
+Content-Type: application/json
+
+{
+  "username": "exepta",
+  "email": "exepta@pga.com",
+  "password": "123456"
 }
 
