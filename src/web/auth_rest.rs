@@ -12,7 +12,7 @@ use jsonwebtoken::{encode, EncodingKey, Header};
 use tower_cookies::{cookie, Cookie};
 use tower_cookies::cookie::SameSite;
 use crate::Error;
-use crate::model::auth::{AuthController, Claims, LoginInfo, LoginResponse, UserTokenCheck, UserTokenState};
+use crate::model::auth::{AuthController, Claims, LoginInfo, LoginResponse, UserTokenCheck};
 use crate::model::user::{User, UserController, UserForCreation};
 use crate::repositories::user_repository::{create_db_user, get_user_by_email, DBUser};
 use crate::resources::JWT_TOKKEN;
@@ -66,7 +66,7 @@ async fn login_user(State(controller): State<AuthController>, Json(login_user): 
     }
 
     let user = raw_login?;
-    let token = controller.generate_jwt(&user.email.as_str(), JWT_TOKKEN.as_str());
+    let token = controller.generate_jwt(&user.email.as_str(), &user.role.as_str(), JWT_TOKKEN.as_str());
     if(token.is_err()) {
         return Err(StatusCode::INTERNAL_SERVER_ERROR)
     }
@@ -74,11 +74,12 @@ async fn login_user(State(controller): State<AuthController>, Json(login_user): 
     Ok(Json(LoginResponse {
         username: user.username,
         email: user.email,
+        role: user.role,
         token: token.unwrap(),
     }))
 }
 
-async fn check_user_session(State(controller): State<AuthController>, header: HeaderMap) -> Result<Json<UserTokenState>, StatusCode> {
+async fn check_user_session(State(controller): State<AuthController>, header: HeaderMap) -> Result<Json<User>, StatusCode> {
     let authentication_token = header.get("Authorization").ok_or(Error::UserTokenCorrupted);
     if authentication_token.is_err() {
         return Err(StatusCode::UNAUTHORIZED);
@@ -88,11 +89,25 @@ async fn check_user_session(State(controller): State<AuthController>, header: He
     if(unpack_token.is_err()) {
         return Err(StatusCode::UNAUTHORIZED)
     }
+    let token_data = unpack_token.unwrap();
 
-    let mut state: bool = false;
-    if(controller.is_valid(&unpack_token.unwrap().claims)) {
-        state = true;
+    if(!controller.is_valid(&token_data.claims)) {
+        return Err(StatusCode::UNAUTHORIZED)
     }
 
-    Ok(Json(UserTokenState{ state }))
+    let raw_db_user = get_user_by_email(token_data.claims.sub.as_str()).await;
+    if(raw_db_user.is_err()) {
+        return Err(StatusCode::INTERNAL_SERVER_ERROR)
+    }
+
+    let db_user = raw_db_user.unwrap();
+
+    Ok(Json(User {
+        username: db_user.username,
+        email: db_user.email,
+        password: db_user.password,
+        role: db_user.role,
+        created_at: db_user.created_at.to_string(),
+        updated_at: db_user.updated_at.to_string(),
+    }))
 }

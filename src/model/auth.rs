@@ -20,20 +20,17 @@ pub struct UserTokenCheck {
 }
 
 #[derive(Serialize)]
-pub struct UserTokenState {
-    pub state: bool
-}
-
-#[derive(Serialize)]
 pub struct LoginResponse {
     pub username: String,
     pub email: String,
+    pub role: String,
     pub token: String
 }
 
 #[derive(Serialize, Deserialize)]
 pub struct Claims {
     pub sub: String,
+    pub role: String,
     pub exp: usize,
 }
 
@@ -72,11 +69,12 @@ impl AuthController {
         })
     }
 
-    pub fn generate_jwt(&self, user_email: &str, secret: &str) -> Result<String, jsonwebtoken::errors::Error> {
+    pub fn generate_jwt(&self, user_email: &str, user_role: &str, secret: &str) -> Result<String, jsonwebtoken::errors::Error> {
         let expiration = Utc::now() + Duration::days(*JWT_LIFE_SPAN);
 
         let claims = Claims {
             sub: user_email.to_string(),
+            role: user_role.to_string(),
             exp: expiration.timestamp() as usize,
         };
 
