@@ -43,25 +43,25 @@ async fn delete_user(State(controller): State<UserController>, Path(email): Path
 }
 
 /// Get the complete user list as Vec<User>.
-async fn list_all_users(State(controller): State<UserController>) -> Result<Json<Vec<User>>, Error> {
+async fn list_all_users(State(controller): State<UserController>) -> Result<Json<Vec<User>>, StatusCode> {
     let users = controller.list_all_users().await;
     if(users.is_err()) {
-        return Err(Error::UserListCannotBeFetch);
+        return Err(StatusCode::BAD_REQUEST)
     }
 
-    Ok(Json(users?))
+    Ok(Json(users.unwrap()))
 }
 
 /// Get users from list by filter over attribs and his values.
 async fn list_attrib_users(State(controller): State<UserController>,
                            Path((attrib, value)): Path<(String, String)>)
-    -> Result<Json<Vec<User>>, Error> {
+    -> Result<Json<Vec<User>>, StatusCode> {
     let users = controller.list_attrib_users(attrib.as_str(), value.as_str()).await;
     if(users.is_err()) {
-        return Err(Error::UserListCannotBeFetch);
+        return Err(StatusCode::BAD_REQUEST)
     }
 
-    Ok(Json(users?))
+    Ok(Json(users.unwrap()))
 }
 
 /// Get one user directly by his name or email.
