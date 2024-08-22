@@ -4,6 +4,7 @@ use axum::http::StatusCode;
 use chrono::{Duration, Utc};
 use jsonwebtoken::{decode, DecodingKey, encode, EncodingKey, Header, TokenData, Validation};
 use serde::{Deserialize, Serialize};
+use crate::model::convert_db_to_user;
 use crate::model::user::User;
 use crate::repositories::user_repository::{get_user_by_email, get_user_by_username};
 use crate::resources::{JWT_LIFE_SPAN, JWT_TOKKEN};
@@ -59,14 +60,7 @@ impl AuthController {
             return Err(StatusCode::UNAUTHORIZED)
         }
 
-        Ok(User {
-            username: warped_user.username,
-            email: warped_user.email,
-            password: warped_user.password,
-            role: warped_user.role,
-            created_at: warped_user.created_at.to_string(),
-            updated_at: warped_user.updated_at.to_string(),
-        })
+        Ok(convert_db_to_user(warped_user).unwrap())
     }
 
     pub fn generate_jwt(&self, user_email: &str, user_role: &str, secret: &str) -> Result<String, jsonwebtoken::errors::Error> {

@@ -10,6 +10,7 @@ pub enum Error {
     UserListCannotBeFetch,
     UserTokenExpired,
     UserTokenCorrupted,
+    UserUidIsEmpty,
     UserNotFound {email: String},
     UserWasFoundByEmail {email: String},
     UserDeleteByIdFailed {id: String},

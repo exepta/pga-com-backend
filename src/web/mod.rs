@@ -9,6 +9,7 @@ use axum::middleware::Next;
 use axum::response::{IntoResponse, Response};
 use crate::Error;
 use crate::model::auth::{AuthController};
+use crate::model::convert_db_to_user;
 use crate::model::user::User;
 use crate::repositories::user_repository::{get_user_by_email};
 use crate::resources::JWT_TOKKEN;
@@ -37,14 +38,7 @@ pub async fn auth_layer(
                 if user_indicator.contains("@") {
                     match get_user_by_email(user_indicator).await {
                         Ok(user) => {
-                            let serialized_user = User {
-                                username: user.username,
-                                email: user.email,
-                                password: user.password,
-                                role: user.role,
-                                created_at: user.created_at.to_string(),
-                                updated_at: user.updated_at.to_string(),
-                            };
+                            let serialized_user = convert_db_to_user(user).unwrap();
                             let response = Json(serialized_user).into_response();
                             Ok(response)
                         }

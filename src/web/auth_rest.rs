@@ -13,6 +13,7 @@ use tower_cookies::{cookie, Cookie};
 use tower_cookies::cookie::SameSite;
 use crate::Error;
 use crate::model::auth::{AuthController, Claims, LoginInfo, LoginResponse, UserTokenCheck};
+use crate::model::convert_db_to_user;
 use crate::model::user::{User, UserController, UserForCreation};
 use crate::repositories::user_repository::{create_db_user, get_user_by_email, DBUser};
 use crate::resources::JWT_TOKKEN;
@@ -102,12 +103,5 @@ async fn check_user_session(State(controller): State<AuthController>, header: He
 
     let db_user = raw_db_user.unwrap();
 
-    Ok(Json(User {
-        username: db_user.username,
-        email: db_user.email,
-        password: db_user.password,
-        role: db_user.role,
-        created_at: db_user.created_at.to_string(),
-        updated_at: db_user.updated_at.to_string(),
-    }))
+    Ok(Json(convert_db_to_user(db_user).unwrap()))
 }

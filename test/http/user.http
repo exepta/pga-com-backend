@@ -1,6 +1,6 @@
 ### GET request for user list
 GET http://localhost:8090/api/v0/users
-Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJleGVwdGFAcGdhLmNvbSIsImV4cCI6MTcyNTI5MTU4M30.hOw_gBLocXByvYOUMHtv5x0-WO0VfxoKLPADnFA8JXc
+Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJleGVwdGFAcGdhLmNvbSIsInJvbGUiOiJtZW1iZXIiLCJleHAiOjE3MjU1MzEyODF9.4pVD9Ro7KArGxfeFYK9Kwf5IPOGhUw0sGylUwoAW6EY
 
 ### GET request for user list with attribs
 GET http://localhost:8090/api/v0/users/role/member
