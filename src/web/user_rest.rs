@@ -11,7 +11,7 @@ use jsonwebtoken::TokenData;
 use tower_cookies::Cookie;
 use crate::Error;
 use crate::model::auth::{AuthController, Claims};
-use crate::model::user::{User, UserController, UserForCreation};
+use crate::model::user::{User, UserController};
 use crate::repositories::user_repository::{DBUser, get_user_by_email};
 use crate::resources::JWT_TOKKEN;
 use crate::web::{auth_layer, check_header_role};

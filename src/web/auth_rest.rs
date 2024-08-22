@@ -35,23 +35,25 @@ pub fn routes(uc: UserController, ac: AuthController) -> Router {
         .with_state(app_state)
 }
 
-async fn register_user(State(controller): State<UserController>, Json(reg_user): Json<UserForCreation>) -> Result<Json<User>, StatusCode> {
-    let mut data = reg_user;
+async fn register_user(State(controller): State<UserController>, Json(reg_user): Json<UserForCreation>) -> StatusCode {
+    let mut data = reg_user.clone();
     let hash = hash_password(data.password);
     data.password = hash;
-    
+
+    if(get_user_by_email(reg_user.clone().email.as_str()).await.is_ok()) {
+        return StatusCode::FOUND
+    }
+
     match controller.create(UserForCreation {
-        username: data.username,
-        password: data.password,
-        email: data.email
+        ..data
     }).await {
         Ok(user) => {
-            println!("Successfully created user");
-            Ok(Json::from(user))
+            println!("Successfully created user [{:?}]", user);
+            StatusCode::OK
         }
         Err(error) => {
-            eprintln!("Failed to register because [{:?}]", error);
-            Err(StatusCode::UNAUTHORIZED)
+            eprintln!("Register failed [{:?}]", error);
+            StatusCode::INTERNAL_SERVER_ERROR
         }
     }
 

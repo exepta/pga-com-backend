@@ -15,7 +15,11 @@ Content-Type: application/json
 {
   "username": "exepta",
   "email": "exepta@pga.com",
-  "password": "123456"
+  "password": "123456",
+  "birthday": "21/12/1996",
+  "avatar_file": "base64:decoded",
+  "banner_file": "base64:decoded",
+  "configurations": "accent_color=#ff00a2"
 }
 
 ### POST auth user login (Successfully)

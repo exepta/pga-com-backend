@@ -1,5 +1,6 @@
 #![allow(unused)]
 
+use core::option::Option;
 use std::hint::black_box;
 use crate::{Error};
 use serde::{Deserialize, Serialize};
@@ -41,11 +42,15 @@ impl Default for User {
     }
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Clone)]
 pub struct UserForCreation {
     pub username: String,
     pub email: String,
     pub password: String,
+    pub birthday: String,
+    pub avatar_file: String,
+    pub banner_file: String,
+    pub configurations: String
 }
 
 #[derive(Clone)]
@@ -65,7 +70,7 @@ impl UserController {
         }
 
         let uuid = Uuid::new_v4().to_string();
-        println!("UUID={}", uuid);
+        //Todo: make avatar and banner files use able on the server(create /images/users/avatars/uuid-uuid-uuid-uuid/files...)
 
         create_db_user(&DBUser {
             uid: uuid,
@@ -73,9 +78,12 @@ impl UserController {
             email: email.to_string(),
             password: user_fc.password,
             role: "member".to_string(),
+            birthday: Option::from(user_fc.birthday),
+            avatar_path: None,
+            banner_path: None,
+            configurations: Option::from(user_fc.configurations),
             created_at: Default::default(),
             updated_at: Default::default(),
-            ..Default::default()
         }).await;
 
         let db_user_raw = get_user_by_email(&email.as_str()).await;
@@ -85,16 +93,7 @@ impl UserController {
 
         let db_user = db_user_raw.unwrap();
 
-        Ok(User {
-            uid: db_user.uid,
-            username: db_user.username,
-            email: db_user.email,
-            password: db_user.password,
-            role: db_user.role,
-            created_at: db_user.created_at.to_string(),
-            updated_at: db_user.updated_at.to_string(),
-            ..Default::default()
-        })
+        Ok(convert_db_to_user(db_user).unwrap())
     }
 
     pub async fn delete(&self, email: &str) -> crate::Result<bool> {
