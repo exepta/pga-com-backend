@@ -66,6 +66,26 @@ pub async fn create_db_user(db_user: &DBUser) {
     pool.close().await;
 }
 
+/// Update user by uid with attrib and value.
+pub async fn update_user(uid: &str, attrib: &str, value: &str) {
+    let query = format!("UPDATE users SET {} = $1 WHERE uid = $2", attrib);
+    let pool = generate_pool().await;
+
+    let result = sqlx::query(&query)
+        .bind(value)
+        .bind(uid)
+        .execute(&pool)
+        .await;
+
+    if(result.is_err()) {
+        eprintln!("SQL Update failed! [{}]", result.err().unwrap());
+    } else {
+        println!("Successfully updated user with uid {}", uid);
+    }
+
+    pool.close().await;
+}
+
 /// Remove a user from the user's database.
 pub async fn delete_user(email: &str) -> Result<bool, Error> {
     let pool = generate_pool().await;
@@ -93,8 +113,34 @@ pub async fn get_user_by_email(email: &str) -> Result<DBUser, Error> {
 
     match result {
         Ok(user) => Ok(user),
-        Err(sqlx::Error::RowNotFound) => {
+        Err(Error::RowNotFound) => {
             println!("No user found with email: {}", email);
+            Err(Error::RowNotFound)
+        }
+        Err(e) => {
+            println!("Error fetching user: {:?}", e);
+            Err(e)
+        }
+    }
+}
+
+/// Get the user by UID
+pub async fn get_user_by_uid(uid: &str) -> Result<DBUser, Error> {
+    let pool = generate_pool().await;
+
+    let result = sqlx::query_as::<_, DBUser>(
+        "SELECT * FROM users WHERE uid = $1"
+    )
+        .bind(uid)
+        .fetch_one(&pool)
+        .await;
+
+    pool.close().await;
+
+    match result {
+        Ok(user) => Ok(user),
+        Err(Error::RowNotFound) => {
+            println!("No user found with uid: {}", uid);
             Err(Error::RowNotFound)
         }
         Err(e) => {
@@ -119,7 +165,7 @@ pub async fn get_user_by_username(username: &str) -> Result<DBUser, Error> {
 
     match result {
         Ok(user) => Ok(user),
-        Err(sqlx::Error::RowNotFound) => {
+        Err(Error::RowNotFound) => {
             println!("No user found with username: {}", username);
             Err(Error::RowNotFound)
         }

@@ -31,6 +31,7 @@ pub struct LoginResponse {
 #[derive(Serialize, Deserialize)]
 pub struct Claims {
     pub sub: String,
+    pub uid: String,
     pub role: String,
     pub exp: usize,
 }
@@ -63,11 +64,12 @@ impl AuthController {
         Ok(convert_db_to_user(warped_user).unwrap())
     }
 
-    pub fn generate_jwt(&self, user_email: &str, user_role: &str, secret: &str) -> Result<String, jsonwebtoken::errors::Error> {
+    pub fn generate_jwt(&self, user_email: &str, user_role: &str, uid: &str, secret: &str) -> Result<String, jsonwebtoken::errors::Error> {
         let expiration = Utc::now() + Duration::days(*JWT_LIFE_SPAN);
 
         let claims = Claims {
             sub: user_email.to_string(),
+            uid: uid.to_string(),
             role: user_role.to_string(),
             exp: expiration.timestamp() as usize,
         };

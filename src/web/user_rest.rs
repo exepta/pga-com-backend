@@ -4,7 +4,7 @@ use std::future::Future;
 use std::ptr::addr_eq;
 use axum::{Json, Router};
 use axum::extract::{FromRef, Path, State};
-use axum::http::StatusCode;
+use axum::http::{HeaderMap, StatusCode};
 use axum::routing::{get, post};
 use axum_extra::TypedHeader;
 use jsonwebtoken::TokenData;
@@ -14,7 +14,7 @@ use crate::model::auth::{AuthController, Claims};
 use crate::model::user::{User, UserController, UserForCreation};
 use crate::repositories::user_repository::{DBUser, get_user_by_email};
 use crate::resources::JWT_TOKKEN;
-use crate::web::auth_layer;
+use crate::web::{auth_layer, check_header_role};
 
 #[derive(Clone, FromRef)]
 struct AppState {
@@ -25,22 +25,11 @@ struct AppState {
 pub fn routes(uc: UserController, ac: AuthController) -> Router {
     let app_state = AppState { uc, ac };
     Router::new()
-        .route("/v0/users", post(create_user).get(list_all_users))
+        .route("/v0/users", get(list_all_users))
         .route("/v0/users/:attrib/:value", get(list_attrib_users))
         .route("/v0/users/:data", get(user_by_name_or_email))
         .layer(axum::middleware::from_fn_with_state(app_state.clone(), auth_layer))
         .with_state(app_state.clone())
-}
-
-/// Create new entry for users in the users table.
-/// TODO: This function is only usable as admin!
-async fn create_user(State(controller): State<UserController>, Json(user_fc): Json<UserForCreation>) -> Result<Json<User>, Error> {
-    let user = controller.create(user_fc).await;
-    if(user.is_err()) {
-        return Err(Error::UserCreationFailed { username: "?".to_string() })
-    }
-
-    Ok(Json::from(user?))
 }
 
 /// Delete a user from the database.
