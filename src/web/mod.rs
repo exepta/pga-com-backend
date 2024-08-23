@@ -62,9 +62,7 @@ pub async fn auth_layer(
                 if user_indicator.contains("@") {
                     match get_user_by_email(user_indicator).await {
                         Ok(user) => {
-                            let serialized_user = convert_db_to_user(user).unwrap();
-                            let response = Json(serialized_user).into_response();
-                            Ok(response)
+                            Ok(next.run(request).await)
                         }
                         Err(_) => {
                             let response = Response::builder()
