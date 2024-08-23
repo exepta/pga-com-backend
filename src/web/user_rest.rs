@@ -25,11 +25,12 @@ struct AppState {
 pub fn routes(uc: UserController, ac: AuthController) -> Router {
     let app_state = AppState { uc, ac };
     Router::new()
+        .route("/v0/conf/:uid", get(list_user_configurations))
         .route("/v0/users", get(list_all_users))
         .route("/v0/users/:attrib/:value", get(list_attrib_users))
         .route("/v0/users/:data", get(user_by_name_or_email))
-        .layer(axum::middleware::from_fn_with_state(app_state.clone(), auth_layer))
         .with_state(app_state.clone())
+        .layer(axum::middleware::from_fn_with_state(app_state.clone(), auth_layer))
 }
 
 /// Delete a user from the database.
@@ -62,6 +63,28 @@ async fn list_attrib_users(State(controller): State<UserController>,
     }
 
     Ok(Json(users.unwrap()))
+}
+
+async fn list_user_configurations(State(controller): State<UserController>, Path(uid): Path<String>) -> Result<Json<Vec<String>>, StatusCode> {
+    let user = controller.get_user_by_uid(uid.as_str()).await;
+    if(user.is_err()) {
+        println!("Error: {:?}", user);
+        return Err(StatusCode::NOT_FOUND)
+    }
+
+    let mut vec: Vec<String> = Vec::new();
+    let mut configuration_text: String;
+    let unpacked = user.unwrap();
+    if(unpacked.configurations.is_none()) {
+        return Err(StatusCode::NOT_IMPLEMENTED)
+    }
+
+    configuration_text = unpacked.configurations.unwrap();
+    configuration_text.split(";").map(|entry| {
+        vec.push(entry.to_string());
+    }).collect::<Vec<_>>();
+
+    Ok(Json(vec))
 }
 
 /// Get one user directly by his name or email.

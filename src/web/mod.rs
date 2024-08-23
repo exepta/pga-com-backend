@@ -52,7 +52,7 @@ pub async fn auth_layer(
 ) -> Result<Response<Body>, StatusCode> {
     let authentication_token = headers.get("Authorization").ok_or(Error::UserTokenCorrupted);
     if authentication_token.is_err() {
-        return Err(StatusCode::UNAUTHORIZED);
+        return Err(StatusCode::UNAUTHORIZED)
     }
 
     match auth_controller.decode_jwt(authentication_token.unwrap().to_str().unwrap(), JWT_TOKKEN.as_str()) {

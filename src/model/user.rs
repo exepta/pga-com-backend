@@ -4,10 +4,11 @@ use core::option::Option;
 use std::hint::black_box;
 use crate::{Error};
 use serde::{Deserialize, Serialize};
+use serde::__private::de::IdentifierDeserializer;
 use uuid::Uuid;
 use crate::model::convert_db_to_user;
 use crate::repositories;
-use crate::repositories::user_repository::{create_db_user, delete_user, get_user_by_email, get_users, get_users_with_attrib, DBUser, get_user_by_username};
+use crate::repositories::user_repository::{create_db_user, delete_user, get_user_by_email, get_users, get_users_with_attrib, DBUser, get_user_by_username, get_user_by_uid};
 
 #[derive(Clone, Debug, Serialize)]
 pub struct User {
@@ -118,6 +119,15 @@ impl UserController {
         }
 
         Ok(convert_db_to_user(user).unwrap())
+    }
+
+    pub async fn get_user_by_uid(&self, uid: &str) -> Result<User, Error> {
+        let result = get_user_by_uid(uid).await;
+        if(result.is_err()) {
+            return Err(Error::UserNotFound {email: uid.to_string()})
+        }
+        let db_user = result.unwrap();
+        Ok(convert_db_to_user(db_user).unwrap())
     }
 
     pub async fn list_all_users(&self) -> Result<Vec<User>, Error> {
