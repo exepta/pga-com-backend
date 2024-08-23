@@ -36,6 +36,12 @@ pub struct Claims {
     pub exp: usize,
 }
 
+#[derive(sqlx::FromRow, Debug, Clone)]
+pub struct DBToken {
+    pub uid: String,
+    pub token: String,
+}
+
 #[derive(Clone)]
 pub struct AuthController { }
 

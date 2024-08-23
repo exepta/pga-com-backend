@@ -11,7 +11,7 @@ GET http://localhost:8090/api/v0/users/exepta
 Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJleGVwdGFAcGdhLmNvbSIsInVpZCI6IjQwYTkzZWYzLTQzZDMtNGFiMC05OTU0LTQ1Nzk3YTBhNjEzYSIsInJvbGUiOiJtZW1iZXIiLCJleHAiOjE3MjU2MjUxNDl9.jXIutohPVpEoi16B0aKpPG98EY03t1MLO1yDz_ibYL8
 
 ### GET request for become user configuration list
-GET http://localhost:8090/api/v0/conf/40a93ef3-43d3-4ab0-9954-45797a0a613a
+GET http://localhost:8090/api/v0/conf/57283f8e-dbbb-4414-a942-853f962fc49b
 Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJleGVwdGFAcGdhLmNvbSIsInVpZCI6IjQwYTkzZWYzLTQzZDMtNGFiMC05OTU0LTQ1Nzk3YTBhNjEzYSIsInJvbGUiOiJtZW1iZXIiLCJleHAiOjE3MjU2MjUxNDl9.jXIutohPVpEoi16B0aKpPG98EY03t1MLO1yDz_ibYL8
 
 ### POST auth register new user (Create the dummy for the login tests)

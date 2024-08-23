@@ -15,7 +15,7 @@ use crate::Error;
 use crate::model::auth::{AuthController, Claims, LoginInfo, LoginResponse, UserTokenCheck};
 use crate::model::convert_db_to_user;
 use crate::model::user::{User, UserController, UserForCreation};
-use crate::repositories::user_repository::{create_db_user, get_user_by_email, DBUser, get_user_by_uid};
+use crate::repositories::user_repository::{create_db_user, get_user_by_email, get_user_by_uid};
 use crate::resources::JWT_TOKKEN;
 use crate::util::pass_hash::hash_password;
 use crate::web::check_header_role;
@@ -83,6 +83,7 @@ async fn login_user(State(controller): State<AuthController>, Json(login_user): 
     }))
 }
 
+//Todo: Refresh token system...
 async fn check_user_session(State(controller): State<AuthController>, header: HeaderMap) -> Result<Json<User>, StatusCode> {
     let token_data = check_header_role(controller, header, "-".to_string());
     if(token_data.is_err()) {

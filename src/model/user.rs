@@ -2,13 +2,47 @@
 
 use core::option::Option;
 use std::hint::black_box;
+use chrono::NaiveDateTime;
 use crate::{Error};
 use serde::{Deserialize, Serialize};
 use serde::__private::de::IdentifierDeserializer;
 use uuid::Uuid;
 use crate::model::convert_db_to_user;
 use crate::repositories;
-use crate::repositories::user_repository::{create_db_user, delete_user, get_user_by_email, get_users, get_users_with_attrib, DBUser, get_user_by_username, get_user_by_uid};
+use crate::repositories::user_repository::{create_db_user, delete_user, get_user_by_email, get_users, get_users_with_attrib, get_user_by_username, get_user_by_uid};
+
+#[derive(sqlx::FromRow, Debug, Clone)]
+pub struct DBUser {
+    pub uid: String,
+    pub username: String,
+    pub password: String,
+    pub email: String,
+    pub role: String,
+    pub birthday: Option<String>,
+    pub avatar_path: Option<String>,
+    pub banner_path: Option<String>,
+    pub configurations: Option<String>, //Separator char ';'
+    pub created_at: NaiveDateTime,
+    pub updated_at: NaiveDateTime,
+}
+
+impl Default for DBUser {
+    fn default() -> Self {
+        Self {
+            uid: String::new(),
+            username: String::new(),
+            email: String::new(),
+            password: String::new(),
+            role: String::from("member"),
+            birthday: None,
+            avatar_path: None,
+            banner_path: None,
+            configurations: None,
+            created_at: NaiveDateTime::default(),
+            updated_at: NaiveDateTime::default(),
+        }
+    }
+}
 
 #[derive(Clone, Debug, Serialize)]
 pub struct User {
@@ -94,7 +128,7 @@ impl UserController {
 
         let db_user = db_user_raw.unwrap();
 
-        Ok(convert_db_to_user(db_user).unwrap())
+        Ok(convert_db_to_user(db_user)?)
     }
 
     pub async fn delete(&self, email: &str) -> crate::Result<bool> {
@@ -118,7 +152,7 @@ impl UserController {
             user = result.unwrap();
         }
 
-        Ok(convert_db_to_user(user).unwrap())
+        Ok(convert_db_to_user(user)?)
     }
 
     pub async fn get_user_by_uid(&self, uid: &str) -> Result<User, Error> {
@@ -127,7 +161,7 @@ impl UserController {
             return Err(Error::UserNotFound {email: uid.to_string()})
         }
         let db_user = result.unwrap();
-        Ok(convert_db_to_user(db_user).unwrap())
+        Ok(convert_db_to_user(db_user)?)
     }
 
     pub async fn list_all_users(&self) -> Result<Vec<User>, Error> {

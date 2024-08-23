@@ -50,4 +50,5 @@ async fn initialize(host: &str, port: i32) {
 
 async fn create_default_tables() {
     database::create_table("./migrations/0001_user_table.sql").await;
+    database::create_table("./migrations/0002_token_table.sql").await;
 }

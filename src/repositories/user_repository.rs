@@ -5,40 +5,7 @@ use sqlx::Error;
 use sqlx::types::chrono::NaiveDateTime;
 use crate::database;
 use crate::database::generate_pool;
-use crate::model::user::User;
-
-#[derive(sqlx::FromRow, Debug, Clone)]
-pub struct DBUser {
-    pub uid: String,
-    pub username: String,
-    pub password: String,
-    pub email: String,
-    pub role: String,
-    pub birthday: Option<String>,
-    pub avatar_path: Option<String>,
-    pub banner_path: Option<String>,
-    pub configurations: Option<String>, //Separator char ';'
-    pub created_at: NaiveDateTime,
-    pub updated_at: NaiveDateTime,
-}
-
-impl Default for DBUser {
-    fn default() -> Self {
-        Self {
-            uid: String::new(),
-            username: String::new(),
-            email: String::new(),
-            password: String::new(),
-            role: String::from("member"),
-            birthday: None,
-            avatar_path: None,
-            banner_path: None,
-            configurations: None,
-            created_at: NaiveDateTime::default(),
-            updated_at: NaiveDateTime::default(),
-        }
-    }
-}
+use crate::model::user::{DBUser, User};
 
 /// Create a new user and save him into users database.
 pub async fn create_db_user(db_user: &DBUser) {

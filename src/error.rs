@@ -15,6 +15,9 @@ pub enum Error {
     UserWasFoundByEmail {email: String},
     UserDeleteByIdFailed {id: String},
     UserCreationFailed {username: String},
+
+    TokenStoreFailed { error: String },
+    TokenFetchFailed
 }
 
 impl IntoResponse for Error {

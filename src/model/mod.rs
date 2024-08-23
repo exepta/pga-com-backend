@@ -1,6 +1,5 @@
 use crate::Error;
-use crate::model::user::User;
-use crate::repositories::user_repository::DBUser;
+use crate::model::user::{DBUser, User};
 
 pub mod user;
 pub mod auth;
