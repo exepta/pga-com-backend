@@ -3,6 +3,7 @@ use crate::model::user::{DBUser, User};
 
 pub mod user;
 pub mod auth;
+pub mod oauth2_provider;
 
 pub fn convert_db_to_user(db_user: DBUser) -> Result<User, Error> {
     let user = User {
