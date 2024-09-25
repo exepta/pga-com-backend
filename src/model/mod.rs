@@ -6,7 +6,7 @@ pub mod auth;
 
 pub fn convert_db_to_user(db_user: DBUser) -> Result<User, Error> {
     let user = User {
-        uid: db_user.uid,
+        id: db_user.id,
         username: db_user.username,
         email: db_user.email,
         password: db_user.password,
@@ -19,7 +19,7 @@ pub fn convert_db_to_user(db_user: DBUser) -> Result<User, Error> {
         updated_at: db_user.updated_at.to_string(),
     };
 
-    if user.uid.is_empty() {
+    if user.id.is_empty() {
         return Err(Error::UserUidIsEmpty)
     }
 

@@ -1,6 +1,7 @@
+create EXTENSION if not exists "uuid-ossp";
+
 create table if not exists users (
-id serial primary key,
-uid varchar(255) unique not null,
+id TEXT primary key default uuid_generate_v4()::TEXT,
 username varchar(32) unique not null,
 password varchar(255) not null,
 email varchar(100) unique not null,

@@ -6,14 +6,13 @@ use chrono::NaiveDateTime;
 use crate::{Error};
 use serde::{Deserialize, Serialize};
 use serde::__private::de::IdentifierDeserializer;
-use uuid::Uuid;
 use crate::model::convert_db_to_user;
 use crate::repositories;
-use crate::repositories::user_repository::{create_db_user, delete_user, get_user_by_email, get_users, get_users_with_attrib, get_user_by_username, get_user_by_uid};
+use crate::repositories::user_repository::{create_db_user, delete_user, get_user_by_email, get_users, get_users_with_attrib, get_user_by_username, get_user_by_id};
 
 #[derive(sqlx::FromRow, Debug, Clone)]
 pub struct DBUser {
-    pub uid: String,
+    pub id: String,
     pub username: String,
     pub password: String,
     pub email: String,
@@ -29,7 +28,7 @@ pub struct DBUser {
 impl Default for DBUser {
     fn default() -> Self {
         Self {
-            uid: String::new(),
+            id: String::new(),
             username: String::new(),
             email: String::new(),
             password: String::new(),
@@ -46,7 +45,7 @@ impl Default for DBUser {
 
 #[derive(Clone, Debug, Serialize)]
 pub struct User {
-    pub uid: String,
+    pub id: String,
     pub username: String,
     pub email: String,
     pub password: String,
@@ -62,7 +61,7 @@ pub struct User {
 impl Default for User {
     fn default() -> Self {
         Self {
-            uid: String::new(),
+            id: String::new(),
             username: String::new(),
             email: String::new(),
             password: String::new(),
@@ -104,11 +103,10 @@ impl UserController {
             return Err(Error::UserWasFoundByEmail {email: email.to_string()})
         }
 
-        let uuid = Uuid::new_v4().to_string();
         //Todo: make avatar and banner files use able on the server(create /images/users/avatars/uuid-uuid-uuid-uuid/files...)
 
         create_db_user(&DBUser {
-            uid: uuid,
+            id: "".to_string(),
             username: user_fc.username,
             email: email.to_string(),
             password: user_fc.password,
@@ -123,6 +121,7 @@ impl UserController {
 
         let db_user_raw = get_user_by_email(&email.as_str()).await;
         if(db_user_raw.is_err()) {
+            println!("????????????????????????");
             return Err(Error::UserCreationFailed { username: email.to_string() })
         }
 
@@ -155,8 +154,8 @@ impl UserController {
         Ok(convert_db_to_user(user)?)
     }
 
-    pub async fn get_user_by_uid(&self, uid: &str) -> Result<User, Error> {
-        let result = get_user_by_uid(uid).await;
+    pub async fn get_user_by_id(&self, uid: &str) -> Result<User, Error> {
+        let result = get_user_by_id(uid).await;
         if(result.is_err()) {
             return Err(Error::UserNotFound {email: uid.to_string()})
         }

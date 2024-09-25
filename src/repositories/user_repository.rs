@@ -9,11 +9,10 @@ use crate::model::user::{DBUser, User};
 
 /// Create a new user and save him into users database.
 pub async fn create_db_user(db_user: &DBUser) {
-    let query = "INSERT INTO users (uid, username, password, email, role, birthday, avatar_path, banner_path, configurations) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)";
+    let query = "INSERT INTO users (username, password, email, role, birthday, avatar_path, banner_path, configurations) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)";
     let pool = generate_pool().await;
 
     let create = sqlx::query(query)
-        .bind(&db_user.uid)
         .bind(&db_user.username)
         .bind(&db_user.password)
         .bind(&db_user.email)
@@ -92,13 +91,13 @@ pub async fn get_user_by_email(email: &str) -> Result<DBUser, Error> {
 }
 
 /// Get the user by UID
-pub async fn get_user_by_uid(uid: &str) -> Result<DBUser, Error> {
+pub async fn get_user_by_id(id: &str) -> Result<DBUser, Error> {
     let pool = generate_pool().await;
 
     let result = sqlx::query_as::<_, DBUser>(
-        "SELECT * FROM users WHERE uid = $1"
+        "SELECT * FROM users WHERE id = $1"
     )
-        .bind(uid)
+        .bind(id)
         .fetch_one(&pool)
         .await;
 
@@ -107,7 +106,7 @@ pub async fn get_user_by_uid(uid: &str) -> Result<DBUser, Error> {
     match result {
         Ok(user) => Ok(user),
         Err(Error::RowNotFound) => {
-            println!("No user found with uid: {}", uid);
+            println!("No user found with id: {}", id);
             Err(Error::RowNotFound)
         }
         Err(e) => {

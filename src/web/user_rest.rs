@@ -66,7 +66,7 @@ async fn list_attrib_users(State(controller): State<UserController>,
 }
 
 async fn list_user_configurations(State(controller): State<UserController>, Path(uid): Path<String>) -> Result<Json<Vec<String>>, StatusCode> {
-    let user = controller.get_user_by_uid(uid.as_str()).await;
+    let user = controller.get_user_by_id(uid.as_str()).await;
     if(user.is_err()) {
         println!("Error: {:?}", user);
         return Err(StatusCode::NOT_FOUND)

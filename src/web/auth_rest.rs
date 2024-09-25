@@ -15,7 +15,7 @@ use crate::Error;
 use crate::model::auth::{AuthController, Claims, LoginInfo, LoginResponse, UserTokenCheck};
 use crate::model::convert_db_to_user;
 use crate::model::user::{User, UserController, UserForCreation};
-use crate::repositories::user_repository::{create_db_user, get_user_by_email, get_user_by_uid};
+use crate::repositories::user_repository::{create_db_user, get_user_by_email, get_user_by_id};
 use crate::resources::JWT_TOKKEN;
 use crate::util::pass_hash::hash_password;
 use crate::web::check_header_role;
@@ -70,7 +70,7 @@ async fn login_user(State(controller): State<AuthController>, Json(login_user): 
     }
 
     let user = raw_login?;
-    let token = controller.generate_jwt(&user.email.as_str(), &user.role.as_str(), &user.uid, JWT_TOKKEN.as_str());
+    let token = controller.generate_jwt(&user.email.as_str(), &user.role.as_str(), &user.id, JWT_TOKKEN.as_str());
     if(token.is_err()) {
         return Err(StatusCode::INTERNAL_SERVER_ERROR)
     }
@@ -90,7 +90,7 @@ async fn check_user_session(State(controller): State<AuthController>, header: He
         return Err(token_data.err().unwrap())
     }
 
-    let raw_db_user = get_user_by_uid(token_data?.claims.uid.as_str()).await;
+    let raw_db_user = get_user_by_id(token_data?.claims.uid.as_str()).await;
     if(raw_db_user.is_err()) {
         return Err(StatusCode::INTERNAL_SERVER_ERROR)
     }
