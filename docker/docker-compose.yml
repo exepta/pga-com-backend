@@ -1,0 +1,27 @@
+version: '3.8'
+services:
+  rust_app:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: rust-test
+    ports:
+      - "8090:8080"
+    depends_on:
+      - db
+    environment:
+      DATABASE_URL: postgres://postgres:postgres@db/postgres
+    volumes:
+      - .:/usr/src/app
+
+  db:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:

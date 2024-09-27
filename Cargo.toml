@@ -3,6 +3,10 @@ name = "pga-com-backend"
 version = "0.1.0"
 edition = "2021"
 
+[[bin]]
+name = "pga-com-backend"
+path = "src/main.rs"
+
 [dependencies]
 # Web
 tokio = {version = "^1", features = ["full"]}
